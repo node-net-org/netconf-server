@@ -1,0 +1,8 @@
+{
+  "$schema": "../../../schemas/device.schema.json",
+  "id": "providers",
+  "description": "A device for providers: interfaces with state and an action, routes that refer to them, a system subtree, RPCs, and a node removed by a deviation",
+  "yang": { "directories": ["yang"], "modules": ["providers-test"], "deviations": ["providers-test-deviations"] },
+  "capabilities": { "candidate": true, "writableRunning": true, "confirmedCommit": true },
+  "data": { "running": "data/running.json", "operational": "data/state.json" }
+}

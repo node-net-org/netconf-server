@@ -1,0 +1,380 @@
+module net-netconf-server-control {
+  yang-version 1.1;
+  namespace "urn:node-net:yang:net-netconf-server-control";
+  prefix nnsc;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import ietf-netconf-acm {
+    prefix nacm;
+  }
+
+  organization
+    "node-net";
+  description
+    "The control module of net-netconf-server: for tests and tutorials
+     to reset the server, inject faults, switch quirks, send
+     notifications, set state, and snapshot and restore datastores.
+
+     The server implements it only when the deployment enables the
+     control module, and it is never meant for a server fronting a
+     real system. Sessions of the deployment's control users are
+     exempt from quirks and faults, so a server whose quirks break
+     the protocol can still be controlled.
+
+     Settings and content that have their own shape are given as RFC
+     7951 JSON text.
+
+     Where the server enforces NACM (RFC 8341), every operation here
+     is denied unless a rule permits it, so a control user also needs
+     a permitting rule or a recovery session.";
+
+  revision 2026-11-15 {
+    description
+      "Every rpc is nacm:default-deny-all.";
+  }
+  revision 2026-11-13 {
+    description
+      "Initial revision.";
+  }
+
+  typedef json {
+    type string;
+    description
+      "RFC 7951 JSON text.";
+  }
+
+  container control {
+    config false;
+    description
+      "What the control module has changed.";
+    container faults {
+      description
+        "Faults waiting to fire.";
+      list fault {
+        key "id";
+        leaf id {
+          type uint32;
+          description
+            "The fault's id, as inject-fault returned it.";
+        }
+        leaf target {
+          type string;
+          description
+            "Which session it is for: session N, user NAME, or
+             next-session.";
+        }
+        leaf trigger {
+          type string;
+          description
+            "When it fires: next-rpc, an operation name, or
+             immediate.";
+        }
+        leaf action {
+          type string;
+          description
+            "What it does.";
+        }
+        leaf remaining {
+          type uint32;
+          description
+            "How many more times it fires.";
+        }
+        leaf session-id {
+          type uint32;
+          description
+            "For a next-session fault, the session it went to.";
+        }
+      }
+    }
+    container quirks {
+      description
+        "Quirks changed at run time; the device definition's quirks
+         are not listed.";
+      list quirk {
+        key "name scope";
+        leaf name {
+          type string;
+          description
+            "The quirk's name.";
+        }
+        leaf scope {
+          type string;
+          description
+            "new-sessions, or session N.";
+        }
+        leaf settings {
+          type json;
+          description
+            "The quirk's settings, or absent when it was turned off.";
+        }
+      }
+    }
+    container snapshots {
+      description
+        "Saved snapshots.";
+      list snapshot {
+        key "name";
+        leaf name {
+          type string;
+          description
+            "The snapshot's name.";
+        }
+        leaf taken {
+          type yang:date-and-time;
+          description
+            "When it was taken.";
+        }
+      }
+    }
+  }
+
+  rpc reset {
+    nacm:default-deny-all;
+    description
+      "Put every datastore back to the device definition's initial
+       data, and clear locks, a pending confirmed commit, faults,
+       run-time quirk changes and snapshots. Providers are not
+       called. Completes before its ok is sent.";
+    input {
+      leaf end-other-sessions {
+        type boolean;
+        default "false";
+        description
+          "Also end every other session, as kill-session would.";
+      }
+    }
+  }
+
+  rpc inject-fault {
+    nacm:default-deny-all;
+    description
+      "Make a session misbehave.";
+    input {
+      choice target {
+        mandatory true;
+        leaf session-id {
+          type uint32;
+          description
+            "The session with this id.";
+        }
+        leaf username {
+          type string;
+          description
+            "Every session of this user.";
+        }
+        leaf next-session {
+          type empty;
+          description
+            "The next session to open.";
+        }
+      }
+      choice trigger {
+        leaf next-rpc {
+          type empty;
+          description
+            "The next request (the default).";
+        }
+        leaf on-operation {
+          type string;
+          description
+            "The next request for this operation, by its local name.";
+        }
+        leaf immediately {
+          type empty;
+          description
+            "At once.";
+        }
+      }
+      leaf count {
+        type uint32 {
+          range "1..max";
+        }
+        default "1";
+        description
+          "How many times it fires.";
+      }
+      choice action {
+        mandatory true;
+        container rpc-error {
+          description
+            "Reply with an rpc-error instead.";
+          leaf error-type {
+            type enumeration {
+              enum transport;
+              enum rpc;
+              enum protocol;
+              enum application;
+            }
+            default "application";
+          }
+          leaf error-tag {
+            type string;
+            default "operation-failed";
+          }
+          leaf error-message {
+            type string;
+          }
+        }
+        leaf no-reply {
+          type empty;
+          description
+            "Send no reply.";
+        }
+        leaf delay {
+          type uint32;
+          units "milliseconds";
+          description
+            "Send the reply after this long.";
+        }
+        leaf drop {
+          type empty;
+          description
+            "Drop the connection.";
+        }
+        leaf no-hello {
+          type empty;
+          description
+            "Send no hello (for next-session).";
+        }
+        leaf-list unsolicited {
+          type string;
+          description
+            "Send these messages before the reply.";
+        }
+        leaf raw-bytes {
+          type string;
+          description
+            "Write this text in place of the framed reply.";
+        }
+      }
+    }
+    output {
+      leaf id {
+        type uint32;
+        description
+          "The fault's id, for clear-faults.";
+      }
+    }
+  }
+
+  rpc clear-faults {
+    nacm:default-deny-all;
+    description
+      "Remove one fault, or all of them.";
+    input {
+      leaf id {
+        type uint32;
+        description
+          "The fault to remove; all of them when absent.";
+      }
+    }
+    output {
+      leaf cleared {
+        type uint32;
+        description
+          "How many were removed.";
+      }
+    }
+  }
+
+  rpc set-quirk {
+    nacm:default-deny-all;
+    description
+      "Turn a quirk on with its settings, or off, for new sessions or
+       for one session. Quirks that act at session start (such as
+       broken chunked framing) reach only sessions opened afterwards.";
+    input {
+      leaf name {
+        type string;
+        mandatory true;
+      }
+      choice value {
+        leaf settings {
+          type json;
+          description
+            "true for the defaults, or an object of settings.";
+        }
+        leaf off {
+          type empty;
+          description
+            "Turn the quirk off.";
+        }
+      }
+      leaf session-id {
+        type uint32;
+        description
+          "The session to change; new sessions when absent.";
+      }
+    }
+  }
+
+  rpc send-notification {
+    nacm:default-deny-all;
+    description
+      "Send a notification of the device's schema to every matching
+       subscription. Its content is validated as for providers'
+       notifications.";
+    input {
+      leaf path {
+        type string;
+        mandatory true;
+        description
+          "The notification: /module:name, or for a nested one the
+           data path of its parent followed by its name.";
+      }
+      leaf content {
+        type json;
+        default "{}";
+        description
+          "The notification's content.";
+      }
+      leaf event-time {
+        type yang:date-and-time;
+        description
+          "The eventTime to send; the server's clock when absent.";
+      }
+    }
+  }
+
+  rpc set-state {
+    nacm:default-deny-all;
+    description
+      "Apply an edit to the state data the server holds for
+       <operational>. Configuration can't be changed this way.";
+    input {
+      leaf edit {
+        type json;
+        mandatory true;
+        description
+          "The edit, with NETCONF edit annotations where needed.";
+      }
+    }
+  }
+
+  rpc snapshot {
+    nacm:default-deny-all;
+    description
+      "Save every datastore under a name, in memory.";
+    input {
+      leaf name {
+        type string;
+        mandatory true;
+      }
+    }
+  }
+
+  rpc restore {
+    nacm:default-deny-all;
+    description
+      "Put every datastore back to a snapshot. Providers are not
+       called; netconf-config-change reports the change to running.";
+    input {
+      leaf name {
+        type string;
+        mandatory true;
+      }
+    }
+  }
+}

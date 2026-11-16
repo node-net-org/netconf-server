@@ -1,0 +1,9 @@
+module twice {
+  yang-version 1.1;
+  namespace "urn:example:twice";
+  prefix tw;
+  include twice-sub;
+  revision 2026-01-01;
+  revision 2025-01-01;
+  container top { leaf a { type string; } }
+}

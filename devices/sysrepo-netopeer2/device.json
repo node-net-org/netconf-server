@@ -1,0 +1,19 @@
+{
+  "$schema": "../../schemas/device.schema.json",
+  "id": "sysrepo-netopeer2",
+  "description": "netopeer2 on sysrepo, as @node-net/netconf's sysrepo-netopeer2 profile knows it: the candidate datastore with confirmed commit, startup, notifications with interleave, every with-defaults mode, NACM data, and netopeer2's sysrepo-plugind module in the hello. Its quirk: candidate edits aren't validated until commit.",
+  "emulates": "sysrepo-netopeer2",
+  "yang": { "modules": ["ietf-netconf-acm"] },
+  "capabilities": {
+    "candidate": true,
+    "confirmedCommit": true,
+    "writableRunning": true,
+    "startup": true,
+    "notification": true,
+    "interleave": true,
+    "withDefaults": { "basicMode": "explicit", "alsoSupported": ["report-all", "report-all-tagged", "trim"] },
+    "extra": ["urn:sysrepo:plugind?module=sysrepo-plugind&revision=2022-08-26"]
+  },
+  "data": { "running": "data/running.json" },
+  "quirks": { "candidateUnvalidated": true }
+}

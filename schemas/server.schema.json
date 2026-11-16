@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/node-net-org/netconf-server/schemas/server.schema.json",
+  "title": "nncd deployment config",
+  "description": "How nncd runs a @node-net/netconf-server: the device, where configuration is saved, the SSH and TLS listeners, users and provider modules. Paths are relative to this file. The config names modules to import, so it is trusted like code. See docs/net-netconf-server-design.md §14.",
+  "type": "object",
+  "required": ["device"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "device": {
+      "description": "Path to the device definition file.",
+      "type": "string",
+      "minLength": 1
+    },
+    "stateDir": {
+      "description": "Directory for saved configuration (with store: file) and a generated host key.",
+      "type": "string",
+      "minLength": 1
+    },
+    "store": {
+      "description": "Where configuration is saved across restarts: memory (lost at exit, the default) or file (in stateDir).",
+      "enum": ["memory", "file"]
+    },
+    "startup": {
+      "description": "How saved configuration meets the providers at start-up: push it to them (the default) or adopt each provider's own.",
+      "enum": ["push", "adopt"]
+    },
+    "unclaimed": {
+      "description": "Configuration no provider claims: store it (the default) or reject it.",
+      "enum": ["store", "reject"]
+    },
+    "control": {
+      "description": "The control module (net-netconf-server-control). On by default without providers, off with them.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "users": {
+          "description": "The only users who may use it. Default: anyone.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "nacm": {
+      "description": "NACM (RFC 8341). The policy itself is the device's ietf-netconf-acm configuration.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recoveryUsers": {
+          "description": "Users whose sessions are recovery sessions, which NACM doesn't restrict, whichever authenticator produced them.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "listen": {
+      "description": "The listeners to run: SSH, TLS or both. Without listen, SSH on port 830.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "ssh": { "$ref": "#/$defs/ssh" },
+        "tls": { "$ref": "#/$defs/tls" }
+      }
+    },
+    "users": {
+      "description": "The users who may log in.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/user" }
+    },
+    "providers": {
+      "description": "Provider modules, imported at start-up. Each module's default export is a factory, called with options.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/provider" }
+    },
+    "logLevel": {
+      "description": "Default info; nncd --log-level overrides it.",
+      "enum": ["trace", "debug", "info", "warn", "error", "silent"]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["store"], "properties": { "store": { "const": "file" } } },
+      "then": { "required": ["stateDir"], "properties": { "stateDir": true } }
+    }
+  ],
+  "$defs": {
+    "ssh": {
+      "description": "NETCONF over SSH (RFC 6242).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "description": "Address to listen on. Default: every address.",
+          "type": "string",
+          "minLength": 1
+        },
+        "port": {
+          "description": "Default 830.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "hostKeys": {
+          "description": "Private host key files. Without them, a key is generated once and kept in stateDir.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "tls": {
+      "description": "NETCONF over TLS (RFC 7589) with mutual X.509 authentication.",
+      "type": "object",
+      "required": ["cert", "key", "ca", "certToName"],
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "description": "Address to listen on. Default: every address.",
+          "type": "string",
+          "minLength": 1
+        },
+        "port": {
+          "description": "Default 6513.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "cert": {
+          "description": "The server certificate file (PEM), optionally followed by its intermediate CAs.",
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "description": "The server certificate's private key file (PEM, unencrypted). Keep it readable only by whoever runs the server.",
+          "type": "string",
+          "minLength": 1
+        },
+        "ca": {
+          "description": "Trust anchor files (PEM): every client certificate must chain to one of them. A self-signed client certificate is trusted by listing it here.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "certToName": {
+          "description": "How client certificates map to usernames (RFC 7407 cert-to-name), tried in ascending id order. Ids must be unique, which nncd checks.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/certToName" }
+        }
+      }
+    },
+    "certToName": {
+      "type": "object",
+      "required": ["id", "fingerprint", "mapType"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "fingerprint": {
+          "description": "The fingerprint of the client certificate or of a certificate in its chain (an intermediate or the trust anchor): an RFC 7407 tls-fingerprint, 03 to 06 for SHA-224 to SHA-512 then the hash as hex octets with colons, or SHA256: and base64.",
+          "type": "string",
+          "pattern": "^(0[3-6](:[0-9a-fA-F]{2}){28,64}|SHA256:[A-Za-z0-9+/]{43}=?)$"
+        },
+        "mapType": {
+          "description": "Where the username comes from.",
+          "enum": ["specified", "san-rfc822-name", "san-dns-name", "san-ip-address", "san-any", "common-name"]
+        },
+        "name": {
+          "description": "The username, for a specified entry only.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["mapType"], "properties": { "mapType": { "const": "specified" } } },
+          "then": { "required": ["name"], "properties": { "name": true } },
+          "else": { "not": { "required": ["name"], "properties": { "name": true } } }
+        }
+      ]
+    },
+    "user": {
+      "type": "object",
+      "required": ["username"],
+      "additionalProperties": false,
+      "properties": {
+        "username": { "type": "string", "minLength": 1 },
+        "passwordHash": {
+          "description": "From nncd hash-password.",
+          "type": "string",
+          "pattern": "^\\$scrypt\\$"
+        },
+        "password": {
+          "description": "A plain-text password, only for a lab user.",
+          "type": "string"
+        },
+        "lab": {
+          "description": "A lab user may have a plain-text password; start-up logs a warning.",
+          "type": "boolean"
+        },
+        "authorizedKeys": {
+          "description": "Public keys, as authorized_keys lines.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "groups": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["password"], "properties": { "password": true } },
+          "then": { "required": ["lab"], "properties": { "lab": { "const": true } } }
+        }
+      ]
+    },
+    "provider": {
+      "type": "object",
+      "required": ["module"],
+      "additionalProperties": false,
+      "properties": {
+        "module": {
+          "description": "A file (starting . or /) or a package name, resolved from this file's directory.",
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "description": "Where to register the provider. Without it, the factory returns { path, provider } or a list of them.",
+          "type": "string",
+          "pattern": "^/"
+        },
+        "startup": { "enum": ["push", "adopt"] },
+        "options": {
+          "description": "Given to the factory."
+        }
+      }
+    }
+  }
+}

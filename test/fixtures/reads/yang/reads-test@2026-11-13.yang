@@ -1,0 +1,38 @@
+module reads-test {
+  yang-version 1.1;
+  namespace "urn:example:reads";
+  prefix rt;
+
+  revision 2026-11-13;
+
+  identity iftype;
+  identity ethernet { base iftype; }
+  identity loopback { base iftype; }
+
+  container system {
+    leaf hostname { type string; }
+    leaf mtu { type uint16; default 1500; }
+    leaf-list dns { type string; ordered-by user; }
+    container clock {
+      leaf timezone { type string; default "UTC"; }
+    }
+    container uptime-info {
+      config false;
+      leaf uptime { type uint32; }
+    }
+  }
+  container interfaces {
+    list interface {
+      key name;
+      leaf name { type string; }
+      leaf type { type identityref { base iftype; } }
+      leaf enabled { type boolean; default true; }
+      leaf description { type string; }
+      container stats {
+        config false;
+        leaf in-octets { type uint64; }
+        leaf out-octets { type uint64; }
+      }
+    }
+  }
+}

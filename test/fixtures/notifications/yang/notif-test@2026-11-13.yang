@@ -1,0 +1,35 @@
+module notif-test {
+  yang-version 1.1;
+  namespace "urn:example:notif";
+  prefix nt;
+
+  revision 2026-11-13;
+
+  container servers {
+    list server {
+      key "name";
+      leaf name { type string; }
+      leaf port { type uint16; default 80; }
+      leaf description { type string; }
+      leaf status {
+        config false;
+        type enumeration { enum up; enum down; }
+      }
+      notification restarted {
+        leaf reason { type string; mandatory true; }
+      }
+    }
+  }
+
+  notification alarm {
+    leaf severity {
+      type enumeration { enum minor; enum major; enum critical; }
+      mandatory true;
+    }
+    leaf text { type string; }
+  }
+
+  notification heartbeat {
+    leaf seq { type uint32; }
+  }
+}

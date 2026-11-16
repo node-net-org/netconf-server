@@ -1,0 +1,5 @@
+{
+  "providers-test:interfaces": {
+    "interface": [{ "name": "eth0", "state": { "oper-status": "up", "in-octets": 100 } }]
+  }
+}

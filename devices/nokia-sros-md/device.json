@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/device.schema.json",
+  "id": "nokia-sros-md",
+  "description": "Nokia SR OS in model-driven management mode, as @node-net/netconf's nokia-sros-md profile knows it: the nokia-conf configuration (as a small stand-in module), with the candidate datastore and confirmed commit.",
+  "emulates": "nokia-sros-md",
+  "yang": { "directories": ["yang"], "modules": ["nokia-conf"] },
+  "capabilities": { "candidate": true, "confirmedCommit": true, "writableRunning": false, "notification": true, "interleave": true },
+  "data": { "running": "data/running.json" }
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "../../../schemas/device.schema.json",
+  "id": "writes",
+  "description": "A device for the write operations: constraints of every kind, ordered lists, a choice, and every write capability",
+  "yang": { "directories": ["yang"], "modules": ["writes-test"] },
+  "capabilities": { "candidate": true, "writableRunning": true, "confirmedCommit": true, "startup": true },
+  "data": { "running": "data/running.xml" }
+}

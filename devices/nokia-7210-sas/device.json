@@ -1,0 +1,20 @@
+{
+  "$schema": "../../schemas/device.schema.json",
+  "id": "nokia-7210-sas",
+  "description": "A Nokia 7210 SAS in classic CLI mode, as @node-net/netconf's nokia-7210-sas profile knows it: the alu-conf-r13 configuration (as a small stand-in module), writable running with no candidate, with-defaults trim only, and its quirks: BEL characters in error messages, empty elements padded across two lines, and subtree filters only two levels deep.",
+  "emulates": "nokia-7210-sas",
+  "yang": { "directories": ["yang"], "modules": ["alu-conf-r13", "alu-cli-content-layer-r13"] },
+  "capabilities": {
+    "writableRunning": true,
+    "candidate": false,
+    "validate": false,
+    "xpath": false,
+    "withDefaults": { "basicMode": "trim" }
+  },
+  "data": { "running": "data/running.json" },
+  "quirks": {
+    "invalidXmlChars": true,
+    "paddedEmptyElements": true,
+    "subtreeFilterLimit": { "depth": 2, "message": "Leaf element specified which is not a key" }
+  }
+}

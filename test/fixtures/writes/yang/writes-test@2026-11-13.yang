@@ -1,0 +1,56 @@
+module writes-test {
+  yang-version 1.1;
+  namespace "urn:example:writes";
+  prefix wt;
+
+  revision 2026-11-13;
+
+  container system {
+    leaf hostname { type string { length "1..32"; } }
+    leaf mtu { type uint16 { range "68..9000"; } default 1500; }
+    leaf min-mtu { type uint16; }
+    leaf-list dns { type string; ordered-by user; }
+    leaf admin-interface {
+      type leafref { path "/wt:interfaces/wt:interface/wt:name"; }
+    }
+    must "not(min-mtu) or mtu >= min-mtu" {
+      error-message "mtu is below min-mtu";
+      error-app-tag "mtu-too-small";
+    }
+  }
+  container interfaces {
+    list interface {
+      key name;
+      unique "address";
+      max-elements 4;
+      leaf name { type string; }
+      leaf type { type string; mandatory true; }
+      leaf address { type string; }
+      leaf enabled { type boolean; default true; }
+    }
+  }
+  container routing {
+    list route {
+      key prefix;
+      ordered-by user;
+      leaf prefix { type string; }
+      leaf next-hop { type string; }
+    }
+  }
+  container transport {
+    presence "a transport is configured";
+    choice protocol {
+      mandatory true;
+      leaf tcp-port { type uint16; }
+      leaf udp-port { type uint16; }
+    }
+  }
+  container ntp {
+    presence "NTP is configured";
+    leaf-list server { type string; min-elements 1; }
+  }
+  container status {
+    config false;
+    leaf uptime { type uint32; }
+  }
+}

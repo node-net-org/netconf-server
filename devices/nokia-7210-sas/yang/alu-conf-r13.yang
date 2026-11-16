@@ -1,0 +1,48 @@
+module alu-conf-r13 {
+  namespace "urn:alcatel-lucent.com:sros:ns:yang:conf-r13";
+  prefix conf;
+
+  organization
+    "node-net";
+  description
+    "A stand-in for the configuration model of a Nokia 7210 SAS in
+     classic CLI mode, for net-netconf-server's emulation of that
+     device. It is not Nokia's module, which is not published
+     openly: it has only the namespace and the few nodes the
+     nokia-7210-sas client profile reads.";
+
+  revision 2026-11-13 {
+    description
+      "The nodes the nokia-7210-sas profile's paths name.";
+  }
+
+  container configure {
+    container system {
+      container name {
+        leaf system-name {
+          type string;
+          description
+            "The system name.";
+        }
+      }
+      leaf contact {
+        type string;
+      }
+      leaf location {
+        type string;
+      }
+    }
+    list port {
+      key "port-id";
+      leaf port-id {
+        type string;
+      }
+      leaf description {
+        type string;
+      }
+      leaf shutdown {
+        type boolean;
+      }
+    }
+  }
+}

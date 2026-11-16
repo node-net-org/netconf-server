@@ -1,0 +1,9 @@
+{
+  "alu-conf-r13:configure": {
+    "system": { "name": { "system-name": "emulated-7210" }, "contact": "", "location": "lab" },
+    "port": [
+      { "port-id": "1/1/1", "description": "uplink", "shutdown": false },
+      { "port-id": "1/1/2", "shutdown": true }
+    ]
+  }
+}

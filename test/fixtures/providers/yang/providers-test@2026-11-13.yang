@@ -1,0 +1,115 @@
+module providers-test {
+  yang-version 1.1;
+  namespace "urn:example:providers";
+  prefix pt;
+
+  description
+    "A test module for net-netconf-server providers.";
+
+  revision 2026-11-13;
+
+  container interfaces {
+    list interface {
+      key "name";
+      leaf name {
+        type string;
+      }
+      leaf mtu {
+        type uint16 {
+          range "68..9000";
+        }
+      }
+      leaf enabled {
+        type boolean;
+      }
+      container state {
+        config false;
+        leaf oper-status {
+          type enumeration {
+            enum up;
+            enum down;
+          }
+        }
+        leaf in-octets {
+          type uint32;
+        }
+      }
+      action reset {
+        input {
+          leaf delay {
+            type uint8 {
+              range "0..60";
+            }
+          }
+        }
+        output {
+          leaf result {
+            type string;
+            mandatory true;
+          }
+        }
+      }
+    }
+  }
+
+  container routes {
+    list route {
+      key "prefix";
+      leaf prefix {
+        type string;
+      }
+      leaf via {
+        type leafref {
+          path "/pt:interfaces/pt:interface/pt:name";
+        }
+      }
+    }
+  }
+
+  container system {
+    leaf hostname {
+      type string;
+    }
+    leaf contact {
+      type string;
+    }
+    container clock {
+      config false;
+      leaf now {
+        type string;
+      }
+    }
+  }
+
+  container extra {
+    leaf kept {
+      type string;
+    }
+    leaf unsupported {
+      type string;
+    }
+  }
+
+  rpc restart {
+    input {
+      leaf after {
+        type uint8 {
+          range "0..60";
+        }
+      }
+      leaf interface {
+        type leafref {
+          path "/pt:interfaces/pt:interface/pt:name";
+        }
+      }
+    }
+    output {
+      leaf when {
+        type string;
+        mandatory true;
+      }
+    }
+  }
+
+  rpc ping;
+}

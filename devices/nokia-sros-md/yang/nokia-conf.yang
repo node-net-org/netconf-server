@@ -1,0 +1,33 @@
+module nokia-conf {
+  namespace "urn:nokia.com:sros:ns:yang:sr:conf";
+  prefix conf;
+
+  organization
+    "node-net";
+  description
+    "A stand-in for the model-driven configuration of Nokia SR OS,
+     for net-netconf-server's emulation of that device. It is not
+     Nokia's module: it has only the namespace and the few nodes the
+     nokia-sros-md client profile reads.";
+
+  revision 2026-11-13 {
+    description
+      "The nodes the nokia-sros-md profile's paths name.";
+  }
+
+  container configure {
+    container system {
+      leaf name {
+        type string;
+        description
+          "The system name.";
+      }
+      leaf contact {
+        type string;
+      }
+      leaf location {
+        type string;
+      }
+    }
+  }
+}

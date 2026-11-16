@@ -1,0 +1,4 @@
+<widgets xmlns="urn:example:widgets">
+  <widget><name>gear</name><colour>red</colour></widget>
+  <widget><name>sprocket</name><colour>blue</colour></widget>
+</widgets>

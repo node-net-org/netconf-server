@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../schemas/device.schema.json",
+  "id": "reads",
+  "description": "A device for the read operations: configuration, state, defaults and identities",
+  "yang": { "directories": ["yang"], "modules": ["reads-test"] },
+  "capabilities": { "candidate": true, "startup": true },
+  "data": { "running": "data/running.xml", "startup": "data/startup.json", "operational": "data/state.json" },
+  "yangLibrary": { "modulesState": true }
+}

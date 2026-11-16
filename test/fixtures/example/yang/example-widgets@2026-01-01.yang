@@ -1,0 +1,19 @@
+module example-widgets {
+  namespace "urn:example:widgets";
+  prefix w;
+  revision 2026-01-01;
+  feature colours;
+  feature sizes;
+  container widgets {
+    list widget {
+      key name;
+      leaf name { type string; }
+      leaf colour { if-feature colours; type string; }
+      leaf size { if-feature sizes; type uint8; }
+      leaf weight { type uint16; }
+    }
+  }
+  rpc spin {
+    input { leaf speed { type uint8; } }
+  }
+}

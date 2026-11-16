@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../schemas/device.schema.json",
+  "id": "example",
+  "description": "A test device with its own module, a feature selection and a deviation",
+  "emulates": "sysrepo-netopeer2",
+  "yang": {
+    "directories": ["yang"],
+    "modules": ["example-widgets"],
+    "features": { "example-widgets": ["colours"] },
+    "deviations": ["example-widgets-deviations"]
+  },
+  "capabilities": { "candidate": true, "confirmedCommit": true, "startup": true, "notification": true, "interleave": true },
+  "data": { "running": "data/running.xml", "operational": "data/state.json" }
+}

@@ -1,0 +1,11 @@
+<system xmlns="urn:example:writes">
+  <hostname>r1</hostname>
+  <dns>8.8.8.8</dns>
+</system>
+<interfaces xmlns="urn:example:writes">
+  <interface>
+    <name>eth0</name>
+    <type>ethernet</type>
+    <address>10.0.0.1</address>
+  </interface>
+</interfaces>

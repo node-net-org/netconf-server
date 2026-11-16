@@ -1,0 +1,7 @@
+module broken {
+  namespace "urn:example:broken";
+  prefix b;
+  container c {
+    leaf x { type no-such-type; }
+  }
+}

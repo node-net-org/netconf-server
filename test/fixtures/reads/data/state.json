@@ -1,0 +1,15 @@
+{
+  "reads-test:system": { "uptime-info": { "uptime": 1234 } },
+  "reads-test:interfaces": {
+    "interface": [
+      { "name": "eth0", "stats": { "in-octets": "100", "out-octets": "200" } },
+      { "name": "lo", "stats": { "in-octets": "1", "out-octets": "1" } },
+      {
+        "name": "mgmt0",
+        "@": { "ietf-origin:origin": "ietf-origin:system" },
+        "type": "reads-test:ethernet",
+        "stats": { "in-octets": "5", "out-octets": "6" }
+      }
+    ]
+  }
+}

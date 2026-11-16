@@ -1,0 +1,77 @@
+module net-netconf-server-monitoring {
+  yang-version 1.1;
+  namespace "urn:node-net:yang:net-netconf-server-monitoring";
+  prefix nnsm;
+
+  import ietf-netconf-monitoring {
+    prefix ncm;
+  }
+
+  organization
+    "node-net";
+  description
+    "What net-netconf-server reports about itself beyond RFC 6022's
+     NETCONF monitoring: its own transport identity, whether each
+     session is a NACM recovery session, and the providers registered
+     with it.";
+
+  revision 2026-11-15 {
+    description
+      "Added the recovery leaf to each session.";
+  }
+  revision 2026-11-13 {
+    description
+      "Initial revision.";
+  }
+
+  identity in-process {
+    base ncm:transport;
+    description
+      "A session opened in the same process as the server, with no
+       network transport: server.transport() and serve() on an
+       in-memory connection.";
+  }
+
+  augment "/ncm:netconf-state/ncm:sessions/ncm:session" {
+    description
+      "What the server knows about a session beyond RFC 6022.";
+    leaf recovery {
+      type boolean;
+      description
+        "True for a recovery session (RFC 8341 Section 3.3.3), which
+         NACM does not restrict.";
+    }
+  }
+
+  container providers {
+    config false;
+    description
+      "The providers registered with the server: code that adds
+       behaviour (read hooks, applying changes to a backend, RPCs and
+       actions) to a subtree of the data.";
+    list provider {
+      key "path";
+      description
+        "One provider, in registration order.";
+      leaf path {
+        type string;
+        description
+          "The schema data path the provider is registered on, as in
+           RFC 7951: /module:top/child.";
+      }
+      leaf out-of-sync {
+        type boolean;
+        description
+          "True when the backend is known to differ from the running
+           configuration for this subtree: a commit failed and undoing
+           it failed too, or the provider reported drift it could not
+           reconcile. The provider clears it once reconciled.";
+      }
+      leaf reason {
+        type string;
+        description
+          "Why the subtree is out of sync.";
+      }
+    }
+  }
+}

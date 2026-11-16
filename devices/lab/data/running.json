@@ -1,0 +1,127 @@
+{
+  "ietf-system:system": {
+    "hostname": "lab1",
+    "contact": "tutorial@example.net"
+  },
+  "ietf-interfaces:interfaces": {
+    "interface": [
+      {
+        "name": "eth0",
+        "description": "uplink to core1",
+        "type": "iana-if-type:ethernetCsmacd",
+        "enabled": true
+      },
+      {
+        "name": "eth1",
+        "description": "spare",
+        "type": "iana-if-type:ethernetCsmacd",
+        "enabled": false
+      }
+    ]
+  },
+  "openconfig-interfaces:interfaces": {
+    "interface": [
+      {
+        "name": "eth0",
+        "config": {
+          "name": "eth0",
+          "type": "iana-if-type:ethernetCsmacd",
+          "description": "uplink to core1",
+          "enabled": true
+        },
+        "openconfig-if-ethernet:ethernet": {
+          "config": {
+            "port-speed": "openconfig-if-ethernet:SPEED_10GB",
+            "auto-negotiate": false
+          },
+          "openconfig-vlan:switched-vlan": {
+            "config": {
+              "interface-mode": "TRUNK",
+              "trunk-vlans": [
+                10,
+                20
+              ]
+            }
+          }
+        }
+      },
+      {
+        "name": "eth1",
+        "config": {
+          "name": "eth1",
+          "type": "iana-if-type:ethernetCsmacd",
+          "description": "spare",
+          "enabled": false
+        },
+        "openconfig-if-ethernet:ethernet": {
+          "config": {
+            "auto-negotiate": true
+          },
+          "openconfig-vlan:switched-vlan": {
+            "config": {
+              "interface-mode": "ACCESS",
+              "access-vlan": 10
+            }
+          }
+        }
+      }
+    ]
+  },
+  "openconfig-lldp:lldp": {
+    "config": {
+      "enabled": true,
+      "system-name": "lab1"
+    },
+    "interfaces": {
+      "interface": [
+        {
+          "name": "eth0",
+          "config": {
+            "name": "eth0",
+            "enabled": true
+          }
+        },
+        {
+          "name": "eth1",
+          "config": {
+            "name": "eth1",
+            "enabled": true
+          }
+        }
+      ]
+    }
+  },
+  "openconfig-platform:components": {
+    "component": [
+      {
+        "name": "chassis",
+        "config": {
+          "name": "chassis"
+        }
+      },
+      {
+        "name": "port-eth0",
+        "config": {
+          "name": "port-eth0"
+        }
+      },
+      {
+        "name": "port-eth1",
+        "config": {
+          "name": "port-eth1"
+        }
+      },
+      {
+        "name": "xcvr-eth0",
+        "config": {
+          "name": "xcvr-eth0"
+        },
+        "openconfig-platform-transceiver:transceiver": {
+          "config": {
+            "enabled": true
+          }
+        }
+      }
+    ]
+  }
+}

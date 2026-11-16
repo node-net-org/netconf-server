@@ -1,0 +1,171 @@
+{
+  "ietf-interfaces:interfaces": {
+    "interface": [
+      {
+        "name": "eth0",
+        "admin-status": "up",
+        "oper-status": "up",
+        "if-index": 1,
+        "phys-address": "02:00:5e:10:00:01",
+        "speed": "10000000000",
+        "statistics": {
+          "discontinuity-time": "2026-11-01T00:00:00Z",
+          "in-octets": "48213397112",
+          "in-unicast-pkts": "39102841",
+          "in-errors": 0,
+          "out-octets": "17730215553",
+          "out-unicast-pkts": "21877310",
+          "out-errors": 0
+        }
+      },
+      {
+        "name": "eth1",
+        "admin-status": "down",
+        "oper-status": "down",
+        "if-index": 2,
+        "phys-address": "02:00:5e:10:00:02",
+        "statistics": {
+          "discontinuity-time": "2026-11-01T00:00:00Z"
+        }
+      }
+    ]
+  },
+  "openconfig-interfaces:interfaces": {
+    "interface": [
+      {
+        "name": "eth0",
+        "state": {
+          "name": "eth0",
+          "type": "iana-if-type:ethernetCsmacd",
+          "ifindex": 1,
+          "admin-status": "UP",
+          "oper-status": "UP",
+          "counters": {
+            "in-octets": "48213397112",
+            "in-unicast-pkts": "39102841",
+            "in-errors": "0",
+            "out-octets": "17730215553",
+            "out-unicast-pkts": "21877310",
+            "out-errors": "0"
+          },
+          "openconfig-platform-port:hardware-port": "port-eth0",
+          "openconfig-platform-transceiver:transceiver": "xcvr-eth0"
+        },
+        "openconfig-if-ethernet:ethernet": {
+          "state": {
+            "mac-address": "02:00:5e:10:00:01",
+            "negotiated-port-speed": "openconfig-if-ethernet:SPEED_10GB"
+          }
+        }
+      },
+      {
+        "name": "eth1",
+        "state": {
+          "name": "eth1",
+          "type": "iana-if-type:ethernetCsmacd",
+          "ifindex": 2,
+          "admin-status": "DOWN",
+          "oper-status": "DOWN",
+          "openconfig-platform-port:hardware-port": "port-eth1"
+        }
+      }
+    ]
+  },
+  "openconfig-lldp:lldp": {
+    "state": {
+      "enabled": true,
+      "system-name": "lab1",
+      "chassis-id": "02:00:5e:10:00:00",
+      "chassis-id-type": "MAC_ADDRESS"
+    },
+    "interfaces": {
+      "interface": [
+        {
+          "name": "eth0",
+          "neighbors": {
+            "neighbor": [
+              {
+                "id": "1",
+                "state": {
+                  "id": "1",
+                  "system-name": "core1",
+                  "system-description": "Example core router",
+                  "chassis-id": "02:00:5e:20:00:00",
+                  "chassis-id-type": "MAC_ADDRESS",
+                  "port-id": "et-0/0/7",
+                  "port-id-type": "INTERFACE_NAME",
+                  "port-description": "to lab1 eth0",
+                  "management-address": "192.0.2.1",
+                  "management-address-type": "IPv4"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "openconfig-platform:components": {
+    "component": [
+      {
+        "name": "chassis",
+        "state": {
+          "name": "chassis",
+          "type": "openconfig-platform-types:CHASSIS",
+          "description": "Lab switch, 2 x 10G",
+          "mfg-name": "Example Networks",
+          "part-no": "EX-LAB-2X10G",
+          "serial-no": "LAB0001"
+        }
+      },
+      {
+        "name": "port-eth0",
+        "state": {
+          "name": "port-eth0",
+          "type": "openconfig-platform-types:PORT",
+          "parent": "chassis"
+        }
+      },
+      {
+        "name": "port-eth1",
+        "state": {
+          "name": "port-eth1",
+          "type": "openconfig-platform-types:PORT",
+          "parent": "chassis"
+        }
+      },
+      {
+        "name": "xcvr-eth0",
+        "state": {
+          "name": "xcvr-eth0",
+          "type": "openconfig-platform-types:TRANSCEIVER",
+          "parent": "port-eth0",
+          "temperature": { "instant": "38.5" }
+        },
+        "openconfig-platform-transceiver:transceiver": {
+          "state": {
+            "present": "PRESENT",
+            "form-factor": "openconfig-transport-types:SFP_PLUS",
+            "connector-type": "openconfig-transport-types:LC_CONNECTOR",
+            "vendor": "Example Optics",
+            "vendor-part": "EO-SFP10G-LR",
+            "serial-no": "EO12345678"
+          },
+          "physical-channels": {
+            "channel": [
+              {
+                "index": 0,
+                "state": {
+                  "index": 0,
+                  "output-power": { "instant": "-2.10" },
+                  "input-power": { "instant": "-3.40" },
+                  "laser-bias-current": { "instant": "31.20" }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

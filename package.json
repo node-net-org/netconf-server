@@ -1,0 +1,97 @@
+{
+  "name": "@node-net/netconf-server",
+  "version": "0.1.0",
+  "description": "NETCONF server framework for Node.js and the browser, built on @node-net/netconf and @node-net/yang",
+  "keywords": [
+    "netconf",
+    "netconf-server",
+    "yang",
+    "rfc6241",
+    "rfc6242",
+    "network-automation",
+    "testing"
+  ],
+  "author": "Mark Abrahams <mark@abrahams.co.nz>",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-net-org/netconf-server.git"
+  },
+  "homepage": "https://github.com/node-net-org/netconf-server#readme",
+  "bugs": {
+    "url": "https://github.com/node-net-org/netconf-server/issues"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "bin": {
+    "nncd": "bin/nncd.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "default": "./dist/core.js"
+    },
+    "./schemas/device.schema.json": "./schemas/device.schema.json",
+    "./schemas/server.schema.json": "./schemas/server.schema.json",
+    "./devices/*": "./devices/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "schemas",
+    "modules",
+    "devices",
+    "!dist/**/*.test.*",
+    "!dist/**/*.tsbuildinfo"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "rm -rf dist && node scripts/gen-base-modules.mjs && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "layers": "depcruise src --config .dependency-cruiser.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:interop": "node scripts/interop.mjs",
+    "portable:check": "node scripts/portable-check.mjs",
+    "check": "npm run lint && npm run typecheck && npm run layers && npm run build && npm test && npm run smoke:require && npm run portable:check && npm run pack:check && npm run audit:runtime",
+    "smoke:require": "node scripts/require-smoke.cjs",
+    "pack:check": "node scripts/pack-check.cjs",
+    "prepublishOnly": "node scripts/check-published-deps.mjs",
+    "check:full": "scripts/check-full.sh",
+    "audit:runtime": "node scripts/audit-runtime.mjs",
+    "deps:report": "node scripts/deps-report.mjs"
+  },
+  "dependencies": {
+    "@node-net/netconf": "^0.1.0",
+    "@node-net/yang": "^0.1.0",
+    "ssh2": "^1.17.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "@types/ssh2": "^1.15.6",
+    "ajv": "^8.20.0",
+    "dependency-cruiser": "^18.7.2",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "rolldown": "^1.2.16",
+    "typescript": "~6.0",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "allowScripts": {
+    "ssh2@1.17.0": true,
+    "cpu-features@0.0.10": true
+  }
+}

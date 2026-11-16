@@ -1,0 +1,9 @@
+module example-widgets-deviations {
+  namespace "urn:example:widgets-deviations";
+  prefix wd;
+  import example-widgets { prefix w; }
+  revision 2026-01-02;
+  deviation /w:widgets/w:widget/w:weight {
+    deviate not-supported;
+  }
+}

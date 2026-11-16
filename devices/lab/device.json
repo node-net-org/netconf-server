@@ -1,0 +1,31 @@
+{
+  "$schema": "../../schemas/device.schema.json",
+  "id": "lab",
+  "description": "The tutorial's lab device: a small switch with two Ethernet ports, modelled with ietf-interfaces and ietf-system and a starter OpenConfig set (interfaces, Ethernet, aggregates, VLANs, LACP, LLDP and platform, with ports and transceivers). It follows the RFCs, with the candidate, startup, confirmed commit and notifications. The OpenConfig and IETF interface trees are separate data. It runs in the browser behind the docs site's terminals (nnc-web), and nncd can serve it too.",
+  "yang": {
+    "directories": ["yang"],
+    "modules": [
+      "ietf-interfaces",
+      "ietf-system",
+      "iana-if-type",
+      "openconfig-interfaces",
+      "openconfig-if-ethernet",
+      "openconfig-if-aggregate",
+      "openconfig-vlan",
+      "openconfig-lacp",
+      "openconfig-lldp",
+      "openconfig-platform",
+      "openconfig-platform-port",
+      "openconfig-platform-transceiver"
+    ]
+  },
+  "capabilities": {
+    "writableRunning": true,
+    "candidate": true,
+    "confirmedCommit": true,
+    "startup": true,
+    "notification": true,
+    "interleave": true
+  },
+  "data": { "running": "data/running.json", "operational": "data/operational.json" }
+}

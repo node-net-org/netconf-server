@@ -1,0 +1,8 @@
+{
+  "$schema": "../../../schemas/device.schema.json",
+  "id": "notifications",
+  "description": "A device for notifications: top-level and nested notifications, configuration to change, and every capability notifications touch",
+  "yang": { "directories": ["yang"], "modules": ["notif-test"] },
+  "capabilities": { "candidate": true, "writableRunning": true, "confirmedCommit": true, "notification": true, "interleave": true },
+  "data": { "running": "data/running.json", "operational": "data/operational.json" }
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/device.schema.json",
+  "id": "schema",
+  "description": "A device with a submodule and a module at two revisions, one only imported",
+  "yang": {
+    "directories": ["yang"],
+    "modules": [{ "name": "twice", "revision": "2026-01-01" }],
+    "importOnly": [{ "name": "twice", "revision": "2025-01-01" }]
+  }
+}

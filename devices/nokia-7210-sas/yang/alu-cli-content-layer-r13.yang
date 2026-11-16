@@ -1,0 +1,16 @@
+module alu-cli-content-layer-r13 {
+  namespace "urn:alcatel-lucent.com:sros:ns:yang:cli-content-layer-r13";
+  prefix cli;
+
+  organization
+    "node-net";
+  description
+    "A stand-in for the CLI content layer module a classic Nokia
+     device advertises, which the nokia-7210-sas client profile
+     detects it by. It defines nothing.";
+
+  revision 2026-11-13 {
+    description
+      "Initial revision.";
+  }
+}

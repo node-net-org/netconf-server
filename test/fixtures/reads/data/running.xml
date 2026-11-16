@@ -1,0 +1,18 @@
+<system xmlns="urn:example:reads">
+  <hostname>r1</hostname>
+  <mtu>1500</mtu>
+  <dns>8.8.8.8</dns>
+  <dns>1.1.1.1</dns>
+</system>
+<interfaces xmlns="urn:example:reads" xmlns:rt="urn:example:reads">
+  <interface>
+    <name>eth0</name>
+    <type>rt:ethernet</type>
+    <enabled>false</enabled>
+    <description>uplink</description>
+  </interface>
+  <interface>
+    <name>lo</name>
+    <type>rt:loopback</type>
+  </interface>
+</interfaces>

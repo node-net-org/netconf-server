@@ -1,0 +1,6 @@
+submodule twice-sub {
+  yang-version 1.1;
+  belongs-to twice { prefix tw; }
+  revision 2026-01-01;
+  grouping g { leaf b { type string; } }
+}

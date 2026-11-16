@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/node-net-org/netconf-server/schemas/device.schema.json",
+  "title": "@node-net/netconf-server device definition",
+  "description": "What a @node-net/netconf-server emulates: its YANG modules, capabilities, initial data and quirks. See docs/net-netconf-server-design.md §13.",
+  "type": "object",
+  "required": ["id", "yang"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": {
+      "description": "Identifies the device definition.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "description": { "type": "string" },
+    "emulates": {
+      "description": "The id of the @node-net/netconf client profile this device should be detected as.",
+      "type": "string"
+    },
+    "yang": {
+      "type": "object",
+      "required": ["modules"],
+      "additionalProperties": false,
+      "properties": {
+        "modules": {
+          "description": "The modules the device implements. Their imports are found automatically, and the NETCONF base modules are added.",
+          "$ref": "#/$defs/moduleRefs"
+        },
+        "features": {
+          "description": "Enabled features per module. A module not listed has every feature enabled; an empty list disables them all.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/moduleName" },
+          "additionalProperties": { "type": "array", "items": { "type": "string" } }
+        },
+        "deviations": {
+          "description": "Implemented modules that carry deviations of other modules.",
+          "$ref": "#/$defs/moduleRefs"
+        },
+        "importOnly": {
+          "description": "Modules to load but not implement.",
+          "$ref": "#/$defs/moduleRefs"
+        },
+        "directories": {
+          "description": "Directories to find modules in, relative to this file, searched before @node-net/yang's bundled IETF modules.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "capabilities": {
+      "description": "The optional protocol capabilities the device advertises, and extras.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "writableRunning": { "description": ":writable-running. Default: true when the device has no candidate.", "type": "boolean" },
+        "candidate": { "description": ":candidate. Default false.", "type": "boolean" },
+        "confirmedCommit": { "description": ":confirmed-commit:1.1. Needs candidate. Default false.", "type": "boolean" },
+        "rollbackOnError": { "description": ":rollback-on-error. Default true.", "type": "boolean" },
+        "validate": { "description": ":validate:1.1. Default true.", "type": "boolean" },
+        "startup": { "description": ":startup. Default false.", "type": "boolean" },
+        "xpath": { "description": ":xpath. Default true.", "type": "boolean" },
+        "withDefaults": {
+          "description": ":with-defaults (RFC 6243), or false for none. Default basic mode explicit, with every other mode also supported.",
+          "oneOf": [
+            { "const": false },
+            {
+              "type": "object",
+              "required": ["basicMode"],
+              "additionalProperties": false,
+              "properties": {
+                "basicMode": { "$ref": "#/$defs/withDefaultsMode" },
+                "alsoSupported": { "type": "array", "items": { "$ref": "#/$defs/withDefaultsMode" } }
+              }
+            }
+          ]
+        },
+        "notification": { "description": ":notification (RFC 5277). Default false.", "type": "boolean" },
+        "interleave": { "description": ":interleave. Needs notification. Default false.", "type": "boolean" },
+        "extra": {
+          "description": "Extra capability URIs, advertised as written.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "moduleCapabilities": {
+          "description": "Module capability URIs exactly as the real device writes them, replacing the generated ones.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "confirmedCommit": { "const": true } }, "required": ["confirmedCommit"] },
+          "then": { "properties": { "candidate": { "const": true } }, "required": ["candidate"] }
+        },
+        {
+          "if": { "properties": { "interleave": { "const": true } }, "required": ["interleave"] },
+          "then": { "properties": { "notification": { "const": true } }, "required": ["notification"] }
+        }
+      ]
+    },
+    "data": {
+      "description": "Initial data files, relative to this file, in XML or RFC 7951 JSON.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "running": { "$ref": "#/$defs/dataFile" },
+        "startup": { "$ref": "#/$defs/dataFile" },
+        "operational": { "$ref": "#/$defs/dataFile" }
+      }
+    },
+    "yangLibrary": {
+      "description": "What the YANG library (RFC 8525) reports beyond the defaults.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "modulesState": {
+          "description": "Also provide the deprecated modules-state container (RFC 7895), as older devices do.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "quirks": {
+      "description": "Misbehaviours of the real device to emulate (design §13): each true (its defaults) or an object of settings, naming the @node-net/netconf client quirk it exercises. With none the server behaves as the RFCs require, and control sessions never get them.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "replyWithoutMessageId": {
+          "description": "Replies without a message-id (exercises the client's replyWithoutMessageId).",
+          "oneOf": [
+            { "const": true },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "replies": { "enum": ["errors", "all"], "default": "errors", "description": "Which replies lose it: rpc-error replies only, or all." }
+              }
+            }
+          ]
+        },
+        "invalidXmlChars": {
+          "description": "rpc-error messages carry a character XML 1.0 does not allow, as devices that copy CLI output do (exercises invalidXmlChars).",
+          "oneOf": [
+            { "const": true },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "char": { "type": "string", "default": "\u0007", "description": "The character: one C0 control character other than tab, line feed and carriage return." }
+              }
+            }
+          ]
+        },
+        "paddedEmptyElements": {
+          "description": "Empty elements in replies written across two lines (exercises paddedEmptyElements).",
+          "oneOf": [
+            { "const": true },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "indent": { "type": "integer", "minimum": 0, "default": 20, "description": "Spaces before the closing tag." }
+              }
+            }
+          ]
+        },
+        "chunkedFramingBroken": {
+          "description": "Advertises base:1.1 but writes broken chunk headers, so the device works only with base:1.0 (exercises forceBaseVersion). Applies to sessions opened after it is set.",
+          "oneOf": [
+            { "const": true },
+            { "type": "object", "additionalProperties": false, "properties": {} }
+          ]
+        },
+        "noPipelining": {
+          "description": "A request that arrives while another is being answered gets operation-failed (exercises maxInFlight).",
+          "oneOf": [
+            { "const": true },
+            { "type": "object", "additionalProperties": false, "properties": {} }
+          ]
+        },
+        "slowCloseSession": {
+          "description": "The close-session reply comes late, or never (exercises closeTimeout).",
+          "oneOf": [
+            { "const": true },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "delay": { "type": "integer", "minimum": 0, "description": "Milliseconds before the reply; never when absent." }
+              }
+            }
+          ]
+        },
+        "subtreeFilterLimit": {
+          "description": "Subtree filters may go only so deep, failing with the device's own error text (exercises subtreeFilter and subtreeFilterDepth).",
+          "oneOf": [
+            { "const": true },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "depth": { "type": "integer", "minimum": 1, "default": 2, "description": "Levels a filter may go down; keyed list entries straight after them don't count." },
+                "message": { "type": "string", "default": "Leaf element specified which is not a key", "description": "The error-message a deeper filter gets." }
+              }
+            }
+          ]
+        },
+        "candidateUnvalidated": {
+          "description": "Candidate edits aren't validated until commit or validate, as netopeer2 does (exercises no client quirk; referenced by the interop allowlist).",
+          "oneOf": [
+            { "const": true },
+            { "type": "object", "additionalProperties": false, "properties": {} }
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "moduleName": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_.-]*$" },
+    "moduleRefs": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "$ref": "#/$defs/moduleName" },
+          {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "$ref": "#/$defs/moduleName" },
+              "revision": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+            }
+          }
+        ]
+      }
+    },
+    "withDefaultsMode": { "enum": ["report-all", "report-all-tagged", "trim", "explicit"] },
+    "dataFile": { "type": "string", "pattern": "\\.(xml|json|XML|JSON)$" }
+  }
+}

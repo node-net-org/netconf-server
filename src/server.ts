@@ -169,7 +169,7 @@ export interface TransportOptions {
 }
 
 const DEFAULT_PRINCIPAL: Principal = Object.freeze({ username: 'local' });
-const CLIENT_PEER = Object.freeze({ host: '@node-net/netconf-server', port: 0 });
+const CLIENT_PEER = Object.freeze({ host: 'net-netconf-server', port: 0 });
 const SERVER_PEER = Object.freeze({ host: 'in-process', port: 0 });
 
 /** Creates a server for a device. */

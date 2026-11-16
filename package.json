@@ -1,6 +1,6 @@
 {
   "name": "@node-net/netconf-server",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "NETCONF server framework for Node.js and the browser, built on @node-net/netconf and @node-net/yang",
   "keywords": [
     "netconf",
